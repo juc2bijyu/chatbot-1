@@ -20,9 +20,9 @@ else:
 if not gemini_api_key:
     st.info("Please add your Gemini API key to continue.", icon="🗝️")
 else:
-    # Geminiクライアントの設定（REST通信に固定）
+    # Geminiクライアントの設定（Streamlit Cloud向けのREST通信指定）
     genai.configure(api_key=gemini_api_key, transport="rest")
-    model = genai.GenerativeModel("models/gemini-2.5-flash")
+    model = genai.GenerativeModel("gemini-2.5-flash")
 
     # メッセージ履歴の初期化
     if "messages" not in st.session_state:
@@ -40,16 +40,16 @@ else:
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Gemini用の会話履歴データを生成
+        # Gemini用の正しい会話履歴フォーマット（parts を [{"text": "..."}] の形式にする）
         gemini_contents = [
             {
                 "role": "model" if m["role"] == "assistant" else "user",
-                "parts": [m["content"]],
+                "parts": [{"text": m["content"]}],
             }
             for m in st.session_state.messages
         ]
 
-        # 直接 generate_content でストリーミング生成
+        # ストリーミング生成
         response_stream = model.generate_content(gemini_contents, stream=True)
 
         def stream_generator():
