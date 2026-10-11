@@ -1,6 +1,11 @@
 import streamlit as st
 import google.generativeai as genai
 
+# APIキー設定直後に挿入
+for m in genai.list_models():
+    if "generateContent" in m.supported_generation_methods:
+        st.write(m.name)
+
 # Show title and description.
 st.title("💬 Chatbot")
 st.write(
