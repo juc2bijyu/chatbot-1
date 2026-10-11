@@ -23,7 +23,8 @@ else:
     # Geminiクライアントの設定
     genai.configure(api_key=gemini_api_key)
     #model = genai.GenerativeModel("gemini-1.5-flash")
-    model = genai.GenerativeModel("gemini-1.5-flash-latest")
+    #model = genai.GenerativeModel("gemini-1.5-flash-latest")
+    model = genai.GenerativeModel("gemini-2.0-flash")
 
     # メッセージ履歴のセッションステート初期化
     if "messages" not in st.session_state:
