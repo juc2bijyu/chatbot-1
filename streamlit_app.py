@@ -1,5 +1,5 @@
 import streamlit as st
-import google.generativeai as genai
+from openai import OpenAI
 
 # タイトルと説明文
 st.title("💬 Chatbot")
@@ -20,9 +20,11 @@ else:
 if not gemini_api_key:
     st.info("Please add your Gemini API key to continue.", icon="🗝️")
 else:
-    # Geminiクライアントの設定（Streamlit Cloud向けのREST通信指定）
-    genai.configure(api_key=gemini_api_key, transport="rest")
-    model = genai.GenerativeModel("gemini-2.5-flash")
+    # Geminiのエンドポイントを指定したOpenAIクライアントを作成
+    client = OpenAI(
+        api_key=gemini_api_key,
+        base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
+    )
 
     # メッセージ履歴の初期化
     if "messages" not in st.session_state:
@@ -35,29 +37,21 @@ else:
 
     # ユーザー入力欄
     if prompt := st.chat_input("What is up?"):
-        # ユーザーの発言を履歴に追加して画面に表示
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Gemini用の正しい会話履歴フォーマット（parts を [{"text": "..."}] の形式にする）
-        gemini_contents = [
-            {
-                "role": "model" if m["role"] == "assistant" else "user",
-                "parts": [{"text": m["content"]}],
-            }
-            for m in st.session_state.messages
-        ]
-
-        # ストリーミング生成
-        response_stream = model.generate_content(gemini_contents, stream=True)
-
-        def stream_generator():
-            for chunk in response_stream:
-                if chunk.text:
-                    yield chunk.text
+        # Gemini 2.5 Flash でストリーミング生成
+        stream = client.chat.completions.create(
+            model="gemini-2.5-flash",
+            messages=[
+                {"role": m["role"], "content": m["content"]}
+                for m in st.session_state.messages
+            ],
+            stream=True,
+        )
 
         # レスポンスの描画と履歴への保存
         with st.chat_message("assistant"):
-            response = st.write_stream(stream_generator())
+            response = st.write_stream(stream)
         st.session_state.messages.append({"role": "assistant", "content": response})
