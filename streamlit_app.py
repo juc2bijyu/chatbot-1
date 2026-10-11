@@ -29,8 +29,14 @@ else:
     genai.configure(api_key=gemini_api_key)
     #model = genai.GenerativeModel("gemini-1.5-flash")
     #model = genai.GenerativeModel("gemini-1.5-flash-latest")
-    model = genai.GenerativeModel("gemini-2.5-flash-lite")
+    #model = genai.GenerativeModel("gemini-2.5-flash-lite")
 
+    # --- 修正後 ---
+    # 1. transport="rest" を指定して REST 経由で通信させる
+    genai.configure(api_key=gemini_api_key, transport="rest")
+    
+    # 2. list_models() で返ってきた完全な名前（models/ 付き）を指定する
+    model = genai.GenerativeModel("models/gemini-2.5-flash")
 
     # メッセージ履歴のセッションステート初期化
     if "messages" not in st.session_state:
