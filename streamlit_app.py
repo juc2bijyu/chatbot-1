@@ -2,9 +2,9 @@ import streamlit as st
 import google.generativeai as genai
 
 # APIキー設定直後に挿入
-for m in genai.list_models():
-    if "generateContent" in m.supported_generation_methods:
-        st.write(m.name)
+#for m in genai.list_models():
+#    if "generateContent" in m.supported_generation_methods:
+#        st.write(m.name)
 
 # Show title and description.
 st.title("💬 Chatbot")
@@ -29,7 +29,8 @@ else:
     genai.configure(api_key=gemini_api_key)
     #model = genai.GenerativeModel("gemini-1.5-flash")
     #model = genai.GenerativeModel("gemini-1.5-flash-latest")
-    model = genai.GenerativeModel("gemini-2.0-flash")
+    model = genai.GenerativeModel("gemini-2.5-flash")
+
 
     # メッセージ履歴のセッションステート初期化
     if "messages" not in st.session_state:
