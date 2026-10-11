@@ -20,7 +20,7 @@ else:
 if not gemini_api_key:
     st.info("Please add your Gemini API key to continue.", icon="🗝️")
 else:
-    # Geminiのエンドポイントを指定したOpenAIクライアントを作成
+    # Geminiのエンドポイントを指定したOpenAIクライアント
     client = OpenAI(
         api_key=gemini_api_key,
         base_url="https://generativelanguage.googleapis.com/v1beta/openai/",
@@ -41,17 +41,22 @@ else:
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Gemini 2.5 Flash でストリーミング生成
-        stream = client.chat.completions.create(
-            model="gemini-2.5-flash",
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ],
-            stream=True,
-        )
+        try:
+            # モデル名を汎用エイリアス 'gemini-flash-latest' に指定
+            stream = client.chat.completions.create(
+                model="gemini-flash-latest",
+                messages=[
+                    {"role": m["role"], "content": m["content"]}
+                    for m in st.session_state.messages
+                ],
+                stream=True,
+            )
 
-        # レスポンスの描画と履歴への保存
-        with st.chat_message("assistant"):
-            response = st.write_stream(stream)
-        st.session_state.messages.append({"role": "assistant", "content": response})
+            # レスポンスの描画と履歴への保存
+            with st.chat_message("assistant"):
+                response = st.write_stream(stream)
+            st.session_state.messages.append({"role": "assistant", "content": response})
+
+        except Exception as e:
+            # Streamlitによる伏字を防ぎ、画面上に正確なエラー理由を表示
+            st.error(f"APIエラー詳細: {e}")
